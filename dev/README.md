@@ -1,8 +1,7 @@
-# Contributor documentation
+# go-docker — contributor notes
 
-This tree holds documentation for **working on** the project this repo documents — as-built architecture, interface contracts, build and test mechanics. Hugo publishes only [`content/`](../content/), so nothing here appears on the Pages site; it is read on GitHub by contributors.
-
-Two boundaries define what belongs here:
-
-- **Audience** — user-facing behavior ("what it does, how to use it") goes in [`content/`](../content/); contributor-facing mechanics ("how it works inside, how to build it") go here.
-- **Privacy** — this repo is public, so `dev/` is public too. Deliberation, rationale, strategy, and unshipped intent never belong here; they stay in the owning org's private `_projects` repo.
+- **Wire discipline.** Request bodies are built as `wireBody` maps with the Engine's exact PascalCase keys — never tagged structs — so the daemon-owned wire vocabulary stays out of the module's type surface. Response documents decode into unexported `*Wire` mirror structs whose PascalCase tags are sanctioned by the decode-only-mirror rule: each mirror is rooted at a concrete `json.Unmarshal` call at its own call site (`readBody` reads; the caller unmarshals). Keep that shape; a helper that decodes `any` breaks the exemption.
+- **Body ownership.** `Client.request` returns the response; the caller closes it (`defer func() { _ = response.Body.Close() }()` — the idiom bodyclose recognizes). `readBody`/`drainBody` never close.
+- **Streams.** `stdcopy.go` implements the 8-byte-header frame demux with a payload cap; `jsonstream.go` scans line-delimited progress documents and converts in-band errors to `ErrStreamError`. Both carry fuzz targets asserting properties (round-trip fidelity; never-panic with sentinel-only failures) — keep them asserting, never reduce them to no-panic probes.
+- **Exec avoids hijacking** deliberately: create → detached start → poll `exec/{id}/json` for the exit code. Output streaming is the logs endpoint's job.
+- **Gate**: `make check` (stickler/yze strict, gocognit ≤ 7, exactly 100.0% coverage, failure paths asserted via `errors.Is`); `make ci` adds race + cross-compile. No `.stickler.yaml` baselines exist — keep it that way.

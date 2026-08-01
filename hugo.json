@@ -1,17 +1,21 @@
 {
-  "baseURL": "https://example.org/",
-  "title": "Project Documentation",
+  "baseURL": "https://gomatic.github.io/docs.go-docker/",
+  "title": "go-docker",
   "publishDir": "_site",
   "enableRobotsTXT": true,
   "markup": {
     "goldmark": {
       "renderHooks": {
-        "link": { "useEmbedded": "fallback" },
-        "image": { "useEmbedded": "fallback" }
+        "link": {
+          "useEmbedded": "fallback"
+        },
+        "image": {
+          "useEmbedded": "fallback"
+        }
       }
     }
   },
   "params": {
-    "description": "Public documentation for the project."
+    "description": "A stdlib-only Go client for the Docker Engine REST API."
   }
 }
